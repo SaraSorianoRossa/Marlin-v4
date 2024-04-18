@@ -276,13 +276,11 @@ impl<F: PrimeField> AHPForR1CS<F> {
     /// Output the first round message and the next state.
     pub fn prover_first_round<'a, R: RngCore>(
         mut state: ProverState<'a, F>,
-        rng: &mut R,
+        _rng: &mut R,
     ) -> Result<(ProverMsg<F>, ProverFirstOracles<F>, ProverState<'a, F>), Error> {
         let round_time = start_timer!(|| "AHP::Prover::FirstRound");
         let domain_h = state.domain_h;
         let zk_bound = state.zk_bound;
-
-        let v_H = domain_h.vanishing_polynomial().into();
 
         let x_time = start_timer!(|| "Computing x polynomial and evals");
         let domain_x = state.domain_x;
@@ -316,22 +314,19 @@ impl<F: PrimeField> AHPForR1CS<F> {
             .collect();
 
         let w_poly = &EvaluationsOnDomain::from_vec_and_domain(w_poly_evals, domain_h)
-            .interpolate()
-            + &(&DensePolynomial::from_coefficients_slice(&[F::rand(rng)]) * &v_H);
+            .interpolate();
         let (w_poly, remainder) = w_poly.divide_by_vanishing_poly(domain_x).unwrap();
         assert!(remainder.is_zero());
         end_timer!(w_poly_time);
 
         let z_a_poly_time = start_timer!(|| "Computing z_A polynomial");
         let z_a = state.z_a.clone().unwrap();
-        let z_a_poly = &EvaluationsOnDomain::from_vec_and_domain(z_a, domain_h).interpolate()
-            + &(&DensePolynomial::from_coefficients_slice(&[F::rand(rng)]) * &v_H);
+        let z_a_poly = EvaluationsOnDomain::from_vec_and_domain(z_a, domain_h).interpolate();
         end_timer!(z_a_poly_time);
 
         let z_b_poly_time = start_timer!(|| "Computing z_B polynomial");
         let z_b = state.z_b.clone().unwrap();
-        let z_b_poly = &EvaluationsOnDomain::from_vec_and_domain(z_b, domain_h).interpolate()
-            + &(&DensePolynomial::from_coefficients_slice(&[F::rand(rng)]) * &v_H);
+        let z_b_poly = EvaluationsOnDomain::from_vec_and_domain(z_b, domain_h).interpolate();
         end_timer!(z_b_poly_time);
 
         let msg = ProverMsg::EmptyMessage;
@@ -344,7 +339,7 @@ impl<F: PrimeField> AHPForR1CS<F> {
         let z_a = LabeledPolynomial::new("z_a".to_string(), z_a_poly, None, Some(1));
         let z_b = LabeledPolynomial::new("z_b".to_string(), z_b_poly, None, Some(1));
 
-        // prover sends w, z_A, z_B and s to verifier        
+        // prover sends w, z_A and z_B to verifier        
         let oracles = ProverFirstOracles {
             w: w.clone(),
             z_a: z_a.clone(),
