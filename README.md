@@ -7,13 +7,13 @@ Este dato nos ha permitido establecer el siguiente paso que sería necesario rea
 
 Con el fin de poder demostrarle al verificador que toda la prueba es verídica se ha definido un [nuevo proceso inner](https://github.com/SaraSorianoRossa/New-inner).
 
-## Ejecutar
+## Build
 Para ejecutar este programa es necesario tener previamente instalado cargo y rust. Una vez se tienen instaladas las librerías necesarias para poder ejecutar la prueba con esta versión es necesario estar en el directorio y escribir en la terminal:
 ```sh
 cargo build --release
 ```
 
-## Testear
+## Test
 En esta versión, igual que en el resto, se ofrece una serie de funciones para testear. Si se desea ejecutarlas para ver el resultado de ellas:
 ```sh
 cargo test
